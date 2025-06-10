@@ -21,7 +21,7 @@ import pedroPathing.constants.LConstants;
 
 @Config
 @Autonomous
-public class ExempluAuto extends LinearOpMode {
+public class RightTruba extends LinearOpMode {
 
     //Robotul
     RobotSystems robot;
@@ -38,7 +38,15 @@ public class ExempluAuto extends LinearOpMode {
     public enum States{
         START,
         MOVING,
-        SCORING,
+        SCORING1,
+        PICKUP1,
+        PICKUP2,
+        PICKUP3,
+        WALLGENERALPOINT,
+        SCORING2,
+        SCORING3,
+        SCORING4,
+        SCORING5,
         FINISH_SCORING,
         PARKING,
         END
@@ -53,8 +61,8 @@ public class ExempluAuto extends LinearOpMode {
 
     //https://pedro-path-generator.vercel.app/ --> generator de traiectorii
 
-    public static double startX = 136, startY = 82, startH = 0; //Punctul de start al robotului
-    public static double preloadX = 105, preloadY = 76, preloadH = 0; //Punctul unde robotul va pune specimenul
+    public static double startX = 0, startY = 0, startH = 0; //Punctul de start al robotului
+    public static double preloadX = 33, preloadY = 0, preloadH = 0; //Punctul unde robotul va pune specimenul
     public static double parkingX = 136, parkingY = 82, parkingH = 270; //Punctul de parcare al robotului
     public static double parkSafeX = 136, parkSafeY = 124;  //Un safe point; acesta este folosit pentru a genera o traiectorie curbata
     //pentru a intelege mai bine cum functioneaza safe points, intra pe generatorul de traiectorii si apasa pe plusul verde din dreapta unei linii de traiectorie
@@ -101,22 +109,24 @@ public class ExempluAuto extends LinearOpMode {
         parkingPath.setLinearHeadingInterpolation(Math.toRadians(preloadH), Math.toRadians(parkingH));  //Schimba heading-ul pe parcursul traiectoriei(pleaca cu un heading de 0 grade si ajunge la 270)
 
         waitForStart();
+        robot.outtake.initAutoTruba();
+        
 
         while (opModeIsActive()){
 
             robot.update();
+            follower.update();
 
             switch (CS){
 
                 case START:
-                    robot.outtake.goToSampleScore();
-                    robot.outtake.barLeft.goToSampleScore();
+                    robot.outtake.goToSpecimenScore();
                     robot.outtake.claw.close();
                     robot.outtake.lift.goToHighChamber();
                     follower.setMaxPower(mediumSpeed); //Seteaza viteza maxima a robotului (are valori intre 0 si 1)
                     follower.followPath(preloadPath);  //Urmeaza traiectoria de preload
                     CS = States.MOVING;
-                    NS = States.SCORING;
+                    NS = States.SCORING1;
                     break;
 
                 case MOVING:
@@ -128,7 +138,7 @@ public class ExempluAuto extends LinearOpMode {
                     }
                     break;
 
-                case SCORING:
+                case SCORING1:
                     //Teoretic cand robotul intra in acest state el deja a clipsat specimenul pe high chamber
                     //Aici robotul va astepta 1 secunda pentru a fi sigur ca specimenul este clipsat
                     if(timer.milliseconds() > timeToClipSpecimen){

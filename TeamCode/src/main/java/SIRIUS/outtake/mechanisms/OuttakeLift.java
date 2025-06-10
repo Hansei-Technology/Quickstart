@@ -5,12 +5,14 @@ import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 
+import SIRIUS.UtilClasses.PIDController;
 import SIRIUS.outtake.OuttakeMap;
 import SIRIUS.outtake.OuttakeSettings;
 
 public class OuttakeLift {
     DcMotorEx motor1, motor2;
-
+    PIDController pid;
+    public int target = 0, currentPos;
     public OuttakeLift(HardwareMap hardwareMap) {
         motor1 = hardwareMap.get(DcMotorEx.class, OuttakeMap.motor1);
         motor2 = hardwareMap.get(DcMotorEx.class, OuttakeMap.motor2);
@@ -24,7 +26,10 @@ public class OuttakeLift {
         motor1.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
         motor2.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
 
-        motor2.setDirection(DcMotor.Direction.REVERSE);
+        motor1.setDirection(DcMotor.Direction.REVERSE);
+
+        pid = new PIDController(OuttakeSettings.p, OuttakeSettings.i, OuttakeSettings.d);
+        pid.maxOutput = 1;
     }
 
     public void setPower(double power) {
@@ -33,11 +38,8 @@ public class OuttakeLift {
     }
 
     public void setTargetPosition(int position) {
-        motor1.setTargetPosition(position);
-        motor2.setTargetPosition(position);
-
-        motor1.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-        motor2.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        target = position;
+        pid.targetValue = target;
     }
 
     public int getCurrentPosition() {
@@ -46,31 +48,38 @@ public class OuttakeLift {
 
     public void goToTransfer() {
         setTargetPosition(OuttakeSettings.liftTransfer);
-        setPower(OuttakeSettings.liftPower);
+        pid.maxOutput = 0.6;
     }
 
     public void goToGround() {
         setTargetPosition(OuttakeSettings.liftGround);
-        setPower(OuttakeSettings.liftPower);
+        pid.maxOutput = 0.6;
     }
 
     public void goToHighBasket() {
         setTargetPosition(OuttakeSettings.liftHighBasket);
-        setPower(OuttakeSettings.liftPower);
+        pid.maxOutput = 1;
     }
 
     public void goToLowBasket() {
         setTargetPosition(OuttakeSettings.liftLowBasket);
-        setPower(OuttakeSettings.liftPower);
     }
 
     public void goToHighChamber() {
         setTargetPosition(OuttakeSettings.liftHighChamber);
-        setPower(OuttakeSettings.liftPower);
+        pid.maxOutput = 1;
     }
 
     public void goToLowChamber() {
         setTargetPosition(OuttakeSettings.liftLowChamber);
-        setPower(OuttakeSettings.liftPower);
+    }
+
+    public void update() {
+        currentPos = motor1.getCurrentPosition();
+        setPower(pid.update(currentPos));
+
+        pid.p = OuttakeSettings.p;
+        pid.i = OuttakeSettings.i;
+        pid.d = OuttakeSettings.d;
     }
 }

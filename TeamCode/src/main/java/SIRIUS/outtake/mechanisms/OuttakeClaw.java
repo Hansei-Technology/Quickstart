@@ -15,18 +15,18 @@ public class OuttakeClaw {
         claw = hardwareMap.get(Servo.class, OuttakeMap.claw);
 
         claw.setPosition(OuttakeSettings.clawOpen);
-        isOpen = false;
+        isOpen = true;
     }
 
     public void open() {
         claw.setPosition(OuttakeSettings.clawOpen);
-        isOpen = false;
+        isOpen = true;
     }
 
 
     public void close() {
         claw.setPosition(OuttakeSettings.clawClose);
-        isOpen = true;
+        isOpen = false;
     }
 
 }

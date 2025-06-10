@@ -11,6 +11,7 @@ import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import org.firstinspires.ftc.robotcore.external.navigation.CurrentUnit;
 
 @Config
+@TeleOp
 public class MotorTest extends LinearOpMode {
     public static String motorToTest = "";
 

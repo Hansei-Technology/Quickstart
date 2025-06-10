@@ -17,6 +17,8 @@ public class RobotSystems {
     public ElapsedTime transferTimer = new ElapsedTime();
     public ElapsedTime clawTimer = new ElapsedTime();
     public ElapsedTime collectSpecimenTimer = new ElapsedTime();
+    public Boolean specimenWasScored = false;
+    public ElapsedTime goGroundTimer = new ElapsedTime();
 
 
     public static int retractingSlidesTime = 300; // Time to retract slides in milliseconds
@@ -54,6 +56,7 @@ public class RobotSystems {
 
             case GETTING_IN_POSITION:
                 outtake.goToCollectSpecimen();
+                liftCS = liftState.SPECIMEN;
                 if(outtake.lift.getCurrentPosition() > 100) {
                     outtake.lift.goToGround();
                 }
@@ -72,6 +75,7 @@ public class RobotSystems {
             case CLOSING_CLAW:
                 if(collectSpecimenTimer.milliseconds() > 160) {
                     outtake.lift.goToHighChamber();
+                    liftCS = liftState.SPECIMEN;
                     outtake.goToSpecimenScore();
                     collectSpecimenCS = collectSpecimenState.IDLE;
                 }
@@ -79,7 +83,7 @@ public class RobotSystems {
         }
     }
 
-    public void collectSpecimen(){
+    public void toggleScoreSpecimen(){
         collectSpecimenCS = collectSpecimenState.GETTING_IN_POSITION;
     }
 
@@ -109,7 +113,8 @@ public class RobotSystems {
     public enum liftState {
         GROUND,
         SAMPLE,
-        SPECIMEN
+        SPECIMEN,
+        TRANSFER
     }
     liftState liftCS = liftState.GROUND;
 
@@ -118,6 +123,8 @@ public class RobotSystems {
     public void toggleExtendo() {
         if(extendoCS == extendoState.EXTENDED) {
             intake.extendo.retract();
+            intake.joint.goToTransfer();
+            intake.active.stop();
             extendoCS = extendoState.RETRACTED;
         } else if(extendoCS == extendoState.RETRACTED) {
             intake.extendo.extend();
@@ -143,6 +150,7 @@ public class RobotSystems {
         transferTimer.reset();
         outtake.claw.open();
         outtake.goToPreTransfer();
+        extendoCS = extendoState.RETRACTED;
     }
 
 
@@ -159,10 +167,16 @@ public class RobotSystems {
                 break;
             case OUTTAKE_MOVING:
                 if(transferTimer.milliseconds() > outtakeMovingTime) {
-                    outtake.closeClaw();
-                    transferCS = transferStates.CLOSING_CLAW;
-                    transferTimer.reset();
-                    intake.active.stop();
+                    if (outtake.touchSensor.isTouch()) {
+                        outtake.closeClaw();
+                        transferCS = transferStates.CLOSING_CLAW;
+                        transferTimer.reset();
+                        intake.active.stop();
+                    } else if (!outtake.touchSensor.isTouch()){
+                        outtake.barLeft.goToPreTransfer();
+                        outtake.joint.goToTransfer();
+                        transferCS = transferStates.IDLE;
+                    }
                 }
                 break;
             case CLOSING_CLAW:
@@ -174,21 +188,29 @@ public class RobotSystems {
     }
 
     public void update() {
+        if(!outtake.claw.isOpen ) {
+            clawTimer.reset();
+        }
+
         updateTransfer();
         updateCollectSpecimen();
+        outtake.lift.update();
 
-        if(outtake.lift.getCurrentPosition() > 150) {
-            if(liftCS == liftState.SAMPLE) {
-                outtake.goToSampleScore();
-            } else if(liftCS == liftState.SPECIMEN) {
-                outtake.goToSpecimenScore();
-            }
-
-            if(outtake.claw.isOpen && clawTimer.milliseconds() > 400) {
+        if (outtake.lift.currentPos > 200){
+        if(outtake.claw.isOpen && clawTimer.milliseconds() > 350) {
+                if(liftCS == liftState.SAMPLE){
                 outtake.goToPreTransfer();
-            }
+            } else if(liftCS == liftState.SPECIMEN){
+                    outtake.lift.goToGround();
+                    if (clawTimer.milliseconds() > 380) {
+                        outtake.joint.goToCollectSpecimen();
+                        outtake.barLeft.goToCollectSpecimen();
+                        outtake.claw.open();
+                    }
+                    collectSpecimenCS = collectSpecimenState.GETTING_IN_POSITION;
+                }
         }
 
 
-    }
+    }}
 }

@@ -11,6 +11,9 @@ import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
+import java.sql.Time;
+
+import SIRIUS.intake.mechanisms.ColorSensor;
 import pedroPathing.constants.FConstants;
 import pedroPathing.constants.LConstants;
 
@@ -18,10 +21,9 @@ import pedroPathing.constants.LConstants;
 //O autonomie ce puncteaza un specimen preload si se parcheaza in observation zone
 
 
-
 @Config
 @Autonomous
-public class ExempluAuto extends LinearOpMode {
+public class LeftCos extends LinearOpMode {
 
     //Robotul
     RobotSystems robot;
@@ -31,14 +33,20 @@ public class ExempluAuto extends LinearOpMode {
 
     //Traiectoriile
     Path preloadPath;
-    Path parkingPath;
+    Path collect1Path;
 
 
     //State-urile autonomiei
     public enum States{
         START,
         MOVING,
-        SCORING,
+        SCORING1,
+        PICKUP1,
+        PICKUP2,
+        PICKUP3,
+        SCORING2,
+        SCORING3,
+        SCORING4,
         FINISH_SCORING,
         PARKING,
         END
@@ -53,8 +61,10 @@ public class ExempluAuto extends LinearOpMode {
 
     //https://pedro-path-generator.vercel.app/ --> generator de traiectorii
 
-    public static double startX = 136, startY = 82, startH = 0; //Punctul de start al robotului
-    public static double preloadX = 105, preloadY = 76, preloadH = 0; //Punctul unde robotul va pune specimenul
+    public static double startX = 0, startY = 0, startH = 0.0; //Punctul de start al robotului
+    public static double preloadX = 5, preloadY = 19, preloadH = -0.6; //Punctul unde robotul va pune specimenul
+    public static double pickUp1X = 5.6, pickUp1Y = 18.3, pickUp1H = 0.0;
+    public static double pickUp2X = 0.0, pickup2Y = 0.0, pickUp2H = 0.0;
     public static double parkingX = 136, parkingY = 82, parkingH = 270; //Punctul de parcare al robotului
     public static double parkSafeX = 136, parkSafeY = 124;  //Un safe point; acesta este folosit pentru a genera o traiectorie curbata
     //pentru a intelege mai bine cum functioneaza safe points, intra pe generatorul de traiectorii si apasa pe plusul verde din dreapta unei linii de traiectorie
@@ -64,8 +74,10 @@ public class ExempluAuto extends LinearOpMode {
 
     //Timers
     ElapsedTime timer;
-    public static double timeToClipSpecimen = 1000; //milisecunde
+    public static double timeToClipSpecimen = 500; //milisecunde
     public static double timeToOpenClaw = 120;
+    public static double timeToCollectSample = 2000;
+    public static double timeToCollectSpecimen = 2000;
 
 
     //Speeds
@@ -77,7 +89,7 @@ public class ExempluAuto extends LinearOpMode {
     public void runOpMode() throws InterruptedException {
         robot = new RobotSystems(hardwareMap);
         follower = new Follower(hardwareMap, FConstants.class, LConstants.class);
-        follower.setStartingPose(new Pose(startX, startY, Math.toRadians(startH)));
+        follower.setStartingPose(new Pose(startX, startY, startH));
         timer = new ElapsedTime();
 
 
@@ -89,34 +101,44 @@ public class ExempluAuto extends LinearOpMode {
                         new Point(preloadX, preloadY, Point.CARTESIAN) // Punctul de final
                 )
         );
-        preloadPath.setConstantHeadingInterpolation(Math.toRadians(preloadH)); // Seteaza un heading constant pe intreaga traiectorie (in acest caz 0 grade)
+        preloadPath.setLinearHeadingInterpolation(startH, preloadH); // Seteaza un heading constant pe intreaga traiectorie (in acest caz 0 grade)
 
-        parkingPath = new Path(
-                new BezierCurve(
+        collect1Path = new Path(
+                new BezierLine(
                         new Point(preloadX, preloadY, Point.CARTESIAN), // Punctul de start
-                        new Point(parkSafeX, parkSafeY, Point.CARTESIAN), //Punctul spre care robotul se va indrepta pe parcursul traiectoriei
-                        new Point(parkingX, parkingY, Point.CARTESIAN) // Punctul de final
+                        new Point(pickUp1X, pickUp1Y, Point.CARTESIAN) // Punctul de final
                 )
         );
-        parkingPath.setLinearHeadingInterpolation(Math.toRadians(preloadH), Math.toRadians(parkingH));  //Schimba heading-ul pe parcursul traiectoriei(pleaca cu un heading de 0 grade si ajunge la 270)
+        collect1Path.setLinearHeadingInterpolation(Math.toRadians(preloadH), Math.toRadians(pickUp1H));  //Schimba heading-ul pe parcursul traiectoriei(pleaca cu un heading de 0 grade si ajunge la 270)
 
-        waitForStart();
+        robot.intake.extendo.retract();
+        robot.intake.joint.goToGround();
+        robot.outtake.barLeft.goToPreTransfer();
+
+        while (opModeInInit()){
+            if (timer.milliseconds() > 3000){
+                robot.outtake.claw.close();
+            }
+        }
 
         while (opModeIsActive()){
 
             robot.update();
+            follower.update();
 
             switch (CS){
 
                 case START:
-                    robot.outtake.goToSampleScore();
-                    robot.outtake.barLeft.goToSampleScore();
+
                     robot.outtake.claw.close();
-                    robot.outtake.lift.goToHighChamber();
-                    follower.setMaxPower(mediumSpeed); //Seteaza viteza maxima a robotului (are valori intre 0 si 1)
-                    follower.followPath(preloadPath);  //Urmeaza traiectoria de preload
+                    robot.intake.extendo.goToTransfer();
+                    robot.intake.joint.goToGround();
+                    robot.outtake.goToSampleScore();
+                    robot.outtake.lift.goToHighBasket();
+                    follower.setMaxPower(maxSpeed); //Seteaza viteza maxima a robotului (are valori intre 0 si 1)
+                    follower.followPath(preloadPath, false);  //Urmeaza traiectoria de preload
                     CS = States.MOVING;
-                    NS = States.SCORING;
+                    NS = States.END;
                     break;
 
                 case MOVING:
@@ -124,39 +146,43 @@ public class ExempluAuto extends LinearOpMode {
                     if(!follower.isBusy()){
                         CS = NS; //Daca a ajuns, trece la urmatorul state
                         timer.reset(); //reseteaza timer-ul(cronometrul) pentru urmatorul state
-
                     }
                     break;
 
-                case SCORING:
-                    //Teoretic cand robotul intra in acest state el deja a clipsat specimenul pe high chamber
-                    //Aici robotul va astepta 1 secunda pentru a fi sigur ca specimenul este clipsat
-                    if(timer.milliseconds() > timeToClipSpecimen){
-                        robot.outtake.claw.open();
-                        timer.reset();
-                        CS = States.FINISH_SCORING;
+                case SCORING1:
+                    robot.outtake.claw.open();
+                    if (timer.milliseconds() > timeToClipSpecimen){
+                        robot.intake.goToCollect();
+                        robot.outtake.goToPreTransfer();
+                        robot.intake.extendo.extend();
+                        follower.setMaxPower(maxSpeed); //Seteaza viteza maxima a robotului (are valori intre 0 si 1)
+                        follower.followPath(collect1Path);
+                        CS = States.MOVING;
+                        NS = States.PICKUP1;
                     }
                     break;
 
-                case FINISH_SCORING:
-                    if(timer.milliseconds() > timeToOpenClaw){
-                        //Odata ce suntem siguri ca clestele s-a deschis, robotul va urma traiectoria de parcare
-                        follower.setMaxPower(slowSpeed);
-                        follower.followPath(parkingPath);
-                        CS = States.PARKING;
-                    }
-                    break;
-
-                case PARKING:
-                    //Daca robotul a ajuns la jumatatea traiectoriei, atunci sa retraga sistemul de outtake si sa mareasca viteza
-                    if(follower.getCurrentTValue() > 0.5){
-                        robot.outtake.goToCollectSpecimen();
-                        robot.outtake.lift.goToGround();
-                        follower.setMaxPower(maxSpeed);
+                case PICKUP1:
+                    if(robot.intake.color.getColor() != ColorSensor.Colors.UNKNOWN) {
+                        robot.outtake.goToPreTransfer();
+                        robot.startTransfer();
+                        robot.outtake.goToSampleScore();
                         CS = States.MOVING;
                         NS = States.END;
                     }
+
                     break;
+                case SCORING2:
+                    robot.outtake.claw.open();
+                    if (timer.milliseconds() > timeToClipSpecimen){
+                        robot.intake.goToCollect();
+                        robot.outtake.goToPreTransfer();
+                        robot.intake.extendo.extend();
+                        follower.setMaxPower(maxSpeed); //Seteaza viteza maxima a robotului (are valori intre 0 si 1)
+                        follower.followPath(collect1Path, false);
+                        CS = States.MOVING;
+                        NS = States.END;
+                    }
 
                 case END:
                     //Aici este ultimul state al autonomiei unde robotul nu face nimic

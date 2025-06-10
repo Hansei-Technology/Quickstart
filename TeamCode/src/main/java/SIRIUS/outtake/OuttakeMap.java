@@ -10,4 +10,6 @@ public class OuttakeMap {
     public static String claw = "outtakeClaw";
     public static String motor1 = "outtakeExtensionFront";
     public static String motor2 = "outtakeExtensionBack";
+
+    public static String touchSensor = "touchSensor";
 }

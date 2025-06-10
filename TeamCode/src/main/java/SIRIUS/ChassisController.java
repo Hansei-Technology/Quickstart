@@ -1,6 +1,7 @@
 package SIRIUS;
 
 import com.acmerobotics.dashboard.config.Config;
+import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.Gamepad;
@@ -44,10 +45,10 @@ public class ChassisController {
 
     public void updateMovement(Gamepad g){
 
-        leftFrontMotor.setPower((-g.left_stick_y + g.left_stick_x + g.right_stick_x * rotSpeed) * speed);
-        rightFrontMotor.setPower((-g.left_stick_y - g.left_stick_x - g.right_stick_x * rotSpeed) * speed);
-        leftRearMotor.setPower((-g.left_stick_y - g.left_stick_x + g.right_stick_x * rotSpeed) * speed);
-        rightRearMotor.setPower((-g.left_stick_y + g.left_stick_x - g.right_stick_x * rotSpeed) * speed);
+        leftFrontMotor.setPower((-g.left_stick_y + g.left_stick_x*1.09 + g.right_stick_x * rotSpeed) * speed);
+        rightFrontMotor.setPower((-g.left_stick_y - g.left_stick_x*1.09 - g.right_stick_x * rotSpeed) * speed);
+        leftRearMotor.setPower((-g.left_stick_y - g.left_stick_x*1.09 + g.right_stick_x * rotSpeed) * speed);
+        rightRearMotor.setPower((-g.left_stick_y + g.left_stick_x*1.09 - g.right_stick_x * rotSpeed) * speed);
 
     }
 }

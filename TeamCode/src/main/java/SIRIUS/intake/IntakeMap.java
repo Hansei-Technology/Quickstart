@@ -13,6 +13,8 @@ public class IntakeMap {
         public static String extendoLeft = "intakeExtensionLeft";
         public static String extendoRight = "intakeExtensionRight";
 
+        public static String colorSensor = "colorSensor";
+
 
 
 }

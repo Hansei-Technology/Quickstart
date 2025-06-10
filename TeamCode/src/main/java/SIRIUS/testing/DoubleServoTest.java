@@ -6,6 +6,7 @@ import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.Servo;
 
 @Config
+@TeleOp
 public class DoubleServoTest extends LinearOpMode {
     public static String servoOne = "";
     public static String servoTwo = "";

@@ -1,11 +1,14 @@
 package SIRIUS.outtake;
 
 import com.qualcomm.robotcore.hardware.HardwareMap;
+import com.qualcomm.robotcore.util.ElapsedTime;
 
+import SIRIUS.RobotSystems;
 import SIRIUS.outtake.mechanisms.OuttakeBar;
 import SIRIUS.outtake.mechanisms.OuttakeJoint;
 import SIRIUS.outtake.mechanisms.OuttakeLift;
 import SIRIUS.outtake.mechanisms.OuttakeClaw;
+import SIRIUS.outtake.mechanisms.OuttakeTouchSensor;
 
 public class OuttakeSubsystem {
     public OuttakeClaw claw;
@@ -13,11 +16,15 @@ public class OuttakeSubsystem {
     public OuttakeBar barLeft;
     public OuttakeLift lift;
 
+    public OuttakeTouchSensor touchSensor;
+
+
     public OuttakeSubsystem(HardwareMap hardwareMap) {
         claw = new OuttakeClaw(hardwareMap);
         joint = new OuttakeJoint(hardwareMap);
         barLeft = new OuttakeBar(hardwareMap);
         lift = new OuttakeLift(hardwareMap);
+        touchSensor = new OuttakeTouchSensor(hardwareMap);
     }
 
     public void goToSampleScore() {
@@ -26,6 +33,8 @@ public class OuttakeSubsystem {
     }
 
     public void goToSpecimenScore() {
+        claw.close();
+        lift.goToHighChamber();
         joint.goToSpecimenScore();
         barLeft.goToSpecimenScore();
     }
@@ -49,15 +58,22 @@ public class OuttakeSubsystem {
         barLeft.goToTransfer();
         lift.goToGround();
     }
+    public void initAutoTruba(){
+        joint.goToSampleScore();
+        barLeft.goToSampleScore();
+        claw.close();
+    }
 
     public void init(){
         goToPreTransfer();
     }
 
     public void goToCollectSpecimen(){
-        joint.goToCollectSpecimen();
-        barLeft.goToCollectSpecimen();
-        claw.open();
+        lift.goToGround();
+            joint.goToCollectSpecimen();
+            barLeft.goToCollectSpecimen();
+            claw.open();
+
     }
 
     public void openClaw() {

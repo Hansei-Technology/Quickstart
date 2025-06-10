@@ -119,6 +119,8 @@ public class LocalizationTest extends OpMode {
 
         telemetryA.addData("x", poseUpdater.getPose().getX());
         telemetryA.addData("y", poseUpdater.getPose().getY());
+        telemetryA.addData("PedroCoordinates: ", poseUpdater.getPose().getAsPedroCoordinates());
+        telemetryA.addData("FTCStandardCoordinates: ", poseUpdater.getPose().getAsFTCStandardCoordinates());
         telemetryA.addData("heading", poseUpdater.getPose().getHeading());
         telemetryA.addData("total heading", poseUpdater.getTotalHeading());
         telemetryA.update();

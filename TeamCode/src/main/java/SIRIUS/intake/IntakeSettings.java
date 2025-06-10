@@ -10,13 +10,13 @@ public abstract class IntakeSettings {
 
 
         //Joint
-        public static double jointTransferPos = 0.095;
+        public static double jointTransferPos = 0.01;
         public static double jointGroundPos = 0.4;
-        public static double jointCollectPos = 0.64;
+        public static double jointCollectPos = 0.53;
 
 
         //Extendo
         public static double extendoExtendPos = 0.52;
-        public static double extendoTransferPos = 0.3;
-        public static double extendoRetractPos = 0.29;
+        public static double extendoTransferPos = 0.27 ;
+        public static double extendoRetractPos = 0.3;
 }
