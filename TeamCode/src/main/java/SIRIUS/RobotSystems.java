@@ -5,6 +5,7 @@ import com.qualcomm.robotcore.hardware.Gamepad;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
+import SIRIUS.UtilClasses.ServoSmoothing;
 import SIRIUS.intake.IntakeSubsystem;
 import SIRIUS.outtake.OuttakeSubsystem;
 
@@ -21,7 +22,7 @@ public class RobotSystems {
     public ElapsedTime goGroundTimer = new ElapsedTime();
 
 
-    public static int retractingSlidesTime = 300; // Time to retract slides in milliseconds
+    public static int retractingSlidesTime = 500; // Time to retract slides in milliseconds
     public static int outtakeMovingTime = 200; // Time to move outtake in milliseconds
     public static int closingClawTime = 200; // Time to close claw in milliseconds
 
@@ -167,16 +168,11 @@ public class RobotSystems {
                 break;
             case OUTTAKE_MOVING:
                 if(transferTimer.milliseconds() > outtakeMovingTime) {
-                    if (outtake.touchSensor.isTouch()) {
                         outtake.closeClaw();
                         transferCS = transferStates.CLOSING_CLAW;
                         transferTimer.reset();
                         intake.active.stop();
-                    } else if (!outtake.touchSensor.isTouch()){
-                        outtake.barLeft.goToPreTransfer();
-                        outtake.joint.goToTransfer();
                         transferCS = transferStates.IDLE;
-                    }
                 }
                 break;
             case CLOSING_CLAW:
@@ -188,6 +184,7 @@ public class RobotSystems {
     }
 
     public void update() {
+
         if(!outtake.claw.isOpen ) {
             clawTimer.reset();
         }

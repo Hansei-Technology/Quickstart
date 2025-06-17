@@ -5,6 +5,7 @@ import com.qualcomm.robotcore.util.ElapsedTime;
 
 import SIRIUS.RobotSystems;
 import SIRIUS.outtake.mechanisms.OuttakeBar;
+import SIRIUS.outtake.mechanisms.OuttakeHang;
 import SIRIUS.outtake.mechanisms.OuttakeJoint;
 import SIRIUS.outtake.mechanisms.OuttakeLift;
 import SIRIUS.outtake.mechanisms.OuttakeClaw;
@@ -18,6 +19,8 @@ public class OuttakeSubsystem {
 
     public OuttakeTouchSensor touchSensor;
 
+    public OuttakeHang hang;
+
 
     public OuttakeSubsystem(HardwareMap hardwareMap) {
         claw = new OuttakeClaw(hardwareMap);
@@ -25,6 +28,7 @@ public class OuttakeSubsystem {
         barLeft = new OuttakeBar(hardwareMap);
         lift = new OuttakeLift(hardwareMap);
         touchSensor = new OuttakeTouchSensor(hardwareMap);
+        hang = new OuttakeHang(hardwareMap);
     }
 
     public void goToSampleScore() {

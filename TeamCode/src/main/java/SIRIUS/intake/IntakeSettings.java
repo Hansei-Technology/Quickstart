@@ -5,18 +5,17 @@ import com.acmerobotics.dashboard.config.Config;
 @Config
 public abstract class IntakeSettings {
         //Active
-        public static double intakeSpeed = 0.7;
-        public static double outtakeSpeed = -0.7;
+        public static double intakeSpeed = 1;
+        public static double outtakeSpeed = -0.6;
 
 
         //Joint
-        public static double jointTransferPos = 0.01;
+        public static double jointTransferPos = 0.15;
         public static double jointGroundPos = 0.4;
-        public static double jointCollectPos = 0.53;
-
+        public static double jointCollectPos = 0.64;
 
         //Extendo
-        public static double extendoExtendPos = 0.52;
-        public static double extendoTransferPos = 0.27 ;
-        public static double extendoRetractPos = 0.3;
+        public static double extendoExtendPos = 0.56;
+        public static double extendoTransferPos = 0.34;
+        public static double extendoRetractPos = 0.36;
 }

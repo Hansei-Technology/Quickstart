@@ -5,6 +5,7 @@ import static SIRIUS.intake.IntakeMap.colorSensor;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.NormalizedRGBA;
 
+import SIRIUS.UtilClasses.ServoSmoothing;
 import SIRIUS.intake.mechanisms.Active;
 import SIRIUS.intake.mechanisms.ColorSensor;
 import SIRIUS.intake.mechanisms.Extendo;
@@ -43,6 +44,9 @@ public class IntakeSubsystem {
     public void goToCollect() {
         joint.goToCollect();
         active.intake();
+    }
+    public void update(){
+
     }
 
 }

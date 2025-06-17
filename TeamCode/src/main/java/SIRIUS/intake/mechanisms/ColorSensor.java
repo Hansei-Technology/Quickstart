@@ -70,12 +70,10 @@ public class ColorSensor {
             return Colors.RED;
         } else if (h >= 45 && h <= 80) {
             return Colors.YELLOW;
-        } else if (h >= 180 && h <= 300) {
+        } else if (h >= 200 && h <= 300) {
             return Colors.BLUE;
         } else {
             return Colors.UNKNOWN;
         }
     }
-
-
 }

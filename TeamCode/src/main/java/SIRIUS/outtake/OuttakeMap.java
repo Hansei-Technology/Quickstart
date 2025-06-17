@@ -12,4 +12,6 @@ public class OuttakeMap {
     public static String motor2 = "outtakeExtensionBack";
 
     public static String touchSensor = "touchSensor";
+
+    public static String hang = "outtakeHang";
 }

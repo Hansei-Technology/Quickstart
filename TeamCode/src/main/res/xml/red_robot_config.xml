@@ -27,14 +27,17 @@
 
         <LynxModule name="Control Hub" port="173">
             <ControlHubImuBHI260AP name="imu" port="0" bus="0" />
+
         <goBILDA5202SeriesMotor name="frontRight" port="0" />
         <goBILDA5202SeriesMotor name="rearRight" port="1" />
         <goBILDA5202SeriesMotor name="intakeActive" port="2" />
+            <goBILDA5202SeriesMotor name="outtakeHang" port="3" />
 
-            <RevColorSensorV3 name="colorSensor" port="0" bus="2"/>
+            <RevColorSensorV3 name="colorSensor" port="0" bus="3"/>
             <RevTouchSensor name="touchSensor" port="1"/>
 
         </LynxModule>
-
+<!--i2c CH port 2 ii mort-->
+<!--servo port 4 EH ii mort-->
     </LynxUsbDevice>
 </Robot>

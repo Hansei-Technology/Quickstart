@@ -3,8 +3,11 @@ package SIRIUS;
 import com.acmerobotics.dashboard.config.Config;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 
+import org.firstinspires.ftc.teamcode.R;
+
 import SIRIUS.UtilClasses.StickyGamepad;
 import SIRIUS.intake.mechanisms.ColorSensor;
+import SIRIUS.outtake.mechanisms.OuttakeHang;
 
 @Config
 @com.qualcomm.robotcore.eventloop.opmode.TeleOp(name = "|> TELEOP_BLUE <|")
@@ -54,7 +57,7 @@ public class TeleOpBlue extends LinearOpMode {
                     robot.intake.active.outtake();
                     robot.intake.joint.goToGround();
                     robot.activeCS = RobotSystems.activeState.SPITTING;
-                } else if(robot.activeCS == RobotSystems.activeState.DOWN){
+                } else if(robot.activeCS == RobotSystems.activeState.DOWN || robot.activeCS == RobotSystems.activeState.SPITTING){
                     robot.intake.active.stop();
                     robot.intake.joint.goToTransfer();
                     robot.activeCS = RobotSystems.activeState.TRANSFER;
@@ -89,22 +92,23 @@ public class TeleOpBlue extends LinearOpMode {
                 robot.outtake.lift.goToGround();
                 robot.liftCS = RobotSystems.liftState.GROUND;
             }
+
             if ((robot.intake.color.getColor() == ColorSensor.Colors.BLUE ||
-                    robot.intake.color.getColor() == ColorSensor.Colors.YELLOW) &&
-                    robot.activeCS == RobotSystems.activeState.DOWN){
-                robot.intake.joint.goToTransfer();
+                    robot.intake.color.getColor() == ColorSensor.Colors.YELLOW)
+                    && robot.activeCS == RobotSystems.activeState.DOWN){
+                robot.intake.active.stop();
                 robot.activeCS = RobotSystems.activeState.UP;
-            }
-            else if (robot.activeCS == RobotSystems.activeState.DOWN && robot.intake.color.getColor() == ColorSensor.Colors.RED){
+                robot.intake.joint.goToTransfer();
+                robot.extendoCS = RobotSystems.extendoState.RETRACTED;
+                robot.intake.extendo.retract();
+            } else if (robot.intake.color.getColor() == ColorSensor.Colors.RED && robot.activeCS == RobotSystems.activeState.DOWN){
                 robot.intake.active.outtake();
-                robot.activeCS = RobotSystems.activeState.SPITTING;
-            } else if (robot.activeCS == RobotSystems.activeState.SPITTING && robot.intake.color.getColor() == ColorSensor.Colors.UNKNOWN){
-                robot.intake.active.intake();
                 robot.activeCS = RobotSystems.activeState.DOWN;
-            } else if (robot.activeCS == RobotSystems.activeState.SPITTING && robot.intake.color.getColor() != ColorSensor.Colors.UNKNOWN){
-                robot.intake.active.outtake();
-                robot.activeCS = RobotSystems.activeState.SPITTING;
+            } else if (robot.activeCS == RobotSystems.activeState.DOWN && robot.intake.color.getColor() == ColorSensor.Colors.UNKNOWN && robot.extendoCS == RobotSystems.extendoState.EXTENDED) {
+                robot.intake.active.intake();
             }
+
+
 
 
             telemetry.addData("red", robot.intake.color.getRed());
@@ -114,7 +118,10 @@ public class TeleOpBlue extends LinearOpMode {
             telemetry.addData("touch", robot.outtake.touchSensor.isTouch());
             telemetry.addData("value", robot.outtake.touchSensor.getValue());
             telemetry.addData("cs", robot.activeCS);
+            telemetry.addData("ecs", robot.extendoCS);
             telemetry.update();
+
+
         }
     }
 }

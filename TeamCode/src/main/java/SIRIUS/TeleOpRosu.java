@@ -54,7 +54,7 @@ public class TeleOpRosu extends LinearOpMode {
                     robot.intake.active.outtake();
                     robot.intake.joint.goToGround();
                     robot.activeCS = RobotSystems.activeState.SPITTING;
-                } else if(robot.activeCS == RobotSystems.activeState.DOWN){
+                } else if(robot.activeCS == RobotSystems.activeState.DOWN || robot.activeCS == RobotSystems.activeState.SPITTING){
                     robot.intake.active.stop();
                     robot.intake.joint.goToTransfer();
                     robot.activeCS = RobotSystems.activeState.TRANSFER;
@@ -91,21 +91,20 @@ public class TeleOpRosu extends LinearOpMode {
             }
 
             if ((robot.intake.color.getColor() == ColorSensor.Colors.RED ||
-                    robot.intake.color.getColor() == ColorSensor.Colors.YELLOW) &&
-                    robot.activeCS == RobotSystems.activeState.DOWN){
-                robot.intake.joint.goToTransfer();
+                    robot.intake.color.getColor() == ColorSensor.Colors.YELLOW)
+                    && robot.activeCS == RobotSystems.activeState.DOWN){
+                robot.intake.active.stop();
                 robot.activeCS = RobotSystems.activeState.UP;
-            }
-            else if (robot.activeCS == RobotSystems.activeState.DOWN && robot.intake.color.getColor() == ColorSensor.Colors.BLUE){
+                robot.intake.joint.goToTransfer();
+                robot.extendoCS = RobotSystems.extendoState.RETRACTED;
+                robot.intake.extendo.retract();
+            } else if (robot.intake.color.getColor() == ColorSensor.Colors.BLUE && robot.activeCS == RobotSystems.activeState.DOWN){
                 robot.intake.active.outtake();
-                robot.activeCS = RobotSystems.activeState.SPITTING;
-            } else if (robot.activeCS == RobotSystems.activeState.SPITTING && robot.intake.color.getColor() == ColorSensor.Colors.UNKNOWN){
-                robot.intake.active.intake();
                 robot.activeCS = RobotSystems.activeState.DOWN;
-            } else if (robot.activeCS == RobotSystems.activeState.SPITTING && robot.intake.color.getColor() != ColorSensor.Colors.UNKNOWN){
-                robot.intake.active.outtake();
-                robot.activeCS = RobotSystems.activeState.SPITTING;
+            } else if (robot.activeCS == RobotSystems.activeState.DOWN && robot.intake.color.getColor() == ColorSensor.Colors.UNKNOWN && robot.extendoCS == RobotSystems.extendoState.EXTENDED) {
+                robot.intake.active.intake();
             }
+
 
 
             telemetry.addData("red", robot.intake.color.getRed());
